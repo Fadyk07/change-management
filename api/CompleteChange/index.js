@@ -15,6 +15,16 @@ module.exports = async function (context, req) {
     return;
   }
 
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    context.res = {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+      body: { error: "Invalid Change Request ID format" }
+    };
+    return;
+  }
+
   try {
     const entity = await tableClient.getEntity("changes", id);
     entity.status = "Approved";

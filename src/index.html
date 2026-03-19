@@ -100,7 +100,7 @@
         <form id="change-form" class="px-6 py-5 space-y-4" onsubmit="submitChange(event)">
           <div>
             <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-            <input type="text" id="title" name="title" required placeholder="e.g. Update firewall rules for subnet B"
+            <input type="text" id="title" name="title" required maxlength="200" placeholder="e.g. Update firewall rules for subnet B"
               class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-azure-500 focus:border-azure-500 outline-none transition" />
           </div>
           <div class="grid grid-cols-2 gap-4">
