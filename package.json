@@ -1,0 +1,11 @@
+{
+  "name": "change-management-tool",
+  "version": "1.0.0",
+  "description": "Change Management Tool for Azure Static Web Apps",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.2.2"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "change-management-api",
+  "version": "1.0.0",
+  "description": "API functions for Change Management Tool",
+  "dependencies": {
+    "@azure/data-tables": "^13.2.2"
+  }
+}
