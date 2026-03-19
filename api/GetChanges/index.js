@@ -13,10 +13,13 @@ module.exports = async function (context, req) {
     }
   }
 
+  const MAX_RESULTS = 500;
   const changes = [];
   const entities = tableClient.listEntities();
+  let count = 0;
 
   for await (const entity of entities) {
+    if (count >= MAX_RESULTS) break;
     changes.push({
       id: entity.rowKey,
       title: entity.title,
@@ -26,6 +29,7 @@ module.exports = async function (context, req) {
       status: entity.status,
       createdAt: entity.createdAt
     });
+    count++;
   }
 
   changes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

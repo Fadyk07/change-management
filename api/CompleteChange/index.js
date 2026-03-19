@@ -27,6 +27,16 @@ module.exports = async function (context, req) {
 
   try {
     const entity = await tableClient.getEntity("changes", id);
+
+    if (entity.status === "Approved") {
+      context.res = {
+        status: 409,
+        headers: { "Content-Type": "application/json" },
+        body: { error: "Change Request is already approved" }
+      };
+      return;
+    }
+
     entity.status = "Approved";
     await tableClient.updateEntity(entity, "Merge");
 

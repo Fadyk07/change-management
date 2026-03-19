@@ -80,7 +80,7 @@ function renderTable(changes) {
     .map(
       (c) => `
     <tr class="hover:bg-gray-50 transition-colors">
-      <td class="px-6 py-4 text-sm font-mono text-gray-500">${shortId(c.id)}</td>
+      <td class="px-6 py-4 text-sm font-mono text-gray-500">${escapeHtml(shortId(c.id))}</td>
       <td class="px-6 py-4 text-sm font-medium text-gray-900">${escapeHtml(c.title)}</td>
       <td class="px-6 py-4">
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClasses[c.priority] || "bg-gray-100 text-gray-700"}">
@@ -96,7 +96,7 @@ function renderTable(changes) {
       <td class="px-6 py-4">
         ${
           c.status === "Pending"
-            ? `<button onclick="completeChange('${c.id}')" class="inline-flex items-center gap-1 text-sm font-medium text-azure-600 hover:text-azure-700 transition">
+            ? `<button data-id="${escapeAttr(c.id)}" class="complete-btn inline-flex items-center gap-1 text-sm font-medium text-azure-600 hover:text-azure-700 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -108,12 +108,20 @@ function renderTable(changes) {
     </tr>`
     )
     .join("");
+
+  document.querySelectorAll(".complete-btn").forEach((btn) => {
+    btn.addEventListener("click", () => completeChange(btn.dataset.id));
+  });
 }
 
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeAttr(text) {
+  return String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 async function submitChange(event) {
