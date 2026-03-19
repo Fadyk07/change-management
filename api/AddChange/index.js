@@ -4,6 +4,18 @@ const crypto = require("crypto");
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING || "UseDevelopmentStorage=true";
 const tableClient = TableClient.fromConnectionString(connectionString, "ChangeRequests");
 
+let tableReady = false;
+
+async function ensureTable() {
+  if (tableReady) return;
+  try {
+    await tableClient.createTable();
+  } catch (err) {
+    if (err.statusCode !== 409) throw err;
+  }
+  tableReady = true;
+}
+
 const PRIORITY_MATRIX = {
   "High-High": "Critical",
   "High-Medium": "High",
@@ -66,12 +78,10 @@ module.exports = async function (context, req) {
   }
 
   try {
-    await tableClient.createTable();
+    await ensureTable();
   } catch (err) {
-    if (err.statusCode !== 409) {
-      context.res = { status: 500, body: { error: "Failed to access table storage" } };
-      return;
-    }
+    context.res = { status: 500, body: { error: "Failed to access table storage" } };
+    return;
   }
 
   const id = crypto.randomUUID();

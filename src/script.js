@@ -42,23 +42,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeModal();
 });
 
-async function loadChanges() {
-  try {
-    const res = await fetch("/api/GetChanges");
-    if (!res.ok) throw new Error("Failed to load changes");
-    const changes = await res.json();
-    renderTable(changes);
-    updateStats(changes);
-  } catch (err) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="px-6 py-12 text-center text-red-500">
-          Failed to load change requests. Make sure the API is running.
-        </td>
-      </tr>`;
-  }
-}
-
 function updateStats(changes) {
   document.getElementById("stat-total").textContent = changes.length;
   document.getElementById("stat-pending").textContent = changes.filter((c) => c.status === "Pending").length;
@@ -114,15 +97,17 @@ function renderTable(changes) {
   });
 }
 
+const _escapeEl = document.createElement("div");
 function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+  _escapeEl.textContent = text;
+  return _escapeEl.innerHTML;
 }
 
 function escapeAttr(text) {
   return String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+let currentChanges = [];
 
 async function submitChange(event) {
   event.preventDefault();
@@ -146,8 +131,11 @@ async function submitChange(event) {
       throw new Error(data.error || "Failed to submit change request");
     }
 
+    const newChange = await res.json();
+    currentChanges.unshift(newChange);
+    renderTable(currentChanges);
+    updateStats(currentChanges);
     closeModal();
-    await loadChanges();
   } catch (err) {
     formError.textContent = err.message;
     formError.classList.remove("hidden");
@@ -158,6 +146,13 @@ async function submitChange(event) {
 }
 
 async function completeChange(id) {
+  const row = currentChanges.find((c) => c.id === id);
+  if (row) {
+    row.status = "Approved";
+    renderTable(currentChanges);
+    updateStats(currentChanges);
+  }
+
   try {
     const res = await fetch("/api/CompleteChange", {
       method: "POST",
@@ -167,12 +162,32 @@ async function completeChange(id) {
 
     if (!res.ok) {
       const data = await res.json();
+      if (row) {
+        row.status = "Pending";
+        renderTable(currentChanges);
+        updateStats(currentChanges);
+      }
       throw new Error(data.error || "Failed to complete change request");
     }
-
-    await loadChanges();
   } catch (err) {
     alert("Error: " + err.message);
+  }
+}
+
+async function loadChanges() {
+  try {
+    const res = await fetch("/api/GetChanges");
+    if (!res.ok) throw new Error("Failed to load changes");
+    currentChanges = await res.json();
+    renderTable(currentChanges);
+    updateStats(currentChanges);
+  } catch (err) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="px-6 py-12 text-center text-red-500">
+          Failed to load change requests. Make sure the API is running.
+        </td>
+      </tr>`;
   }
 }
 

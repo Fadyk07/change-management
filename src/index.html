@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Change Management Tool</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+  <script src="https://cdn.tailwindcss.com" defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -16,6 +17,11 @@
       }
     }
   </script>
+  <style>
+    /* Critical CSS inlined — prevents flash of unstyled content while Tailwind loads */
+    body { font-family: ui-sans-serif, system-ui, sans-serif; background: #f9fafb; margin: 0; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -135,6 +141,6 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>

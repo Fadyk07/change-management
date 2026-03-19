@@ -3,14 +3,24 @@ const { TableClient } = require("@azure/data-tables");
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING || "UseDevelopmentStorage=true";
 const tableClient = TableClient.fromConnectionString(connectionString, "ChangeRequests");
 
-module.exports = async function (context, req) {
+let tableReady = false;
+
+async function ensureTable() {
+  if (tableReady) return;
   try {
     await tableClient.createTable();
   } catch (err) {
-    if (err.statusCode !== 409) {
-      context.res = { status: 500, body: { error: "Failed to access table storage" } };
-      return;
-    }
+    if (err.statusCode !== 409) throw err;
+  }
+  tableReady = true;
+}
+
+module.exports = async function (context, req) {
+  try {
+    await ensureTable();
+  } catch (err) {
+    context.res = { status: 500, body: { error: "Failed to access table storage" } };
+    return;
   }
 
   const MAX_RESULTS = 500;
